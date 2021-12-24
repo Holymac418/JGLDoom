@@ -2,6 +2,7 @@ package program;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwGetKey;
@@ -92,14 +93,14 @@ public class Camera
 		Vector3f d = new Vector3f();
 		Position.add(Forward, d);
 		Matrix4f f = new Matrix4f();
-		//if(UsingCustomLookAt)
-		//{
+		if(UsingCustomLookAt)
+		{
 			//f = calculate_lookAt_matrix(Position, d);
-		//}
-		//else
-		//{
+		}
+		else
+		{
 			f.lookAt(Position, d, Up, f);
-		//}
+		}
 
 		return f;
 	}
@@ -142,7 +143,7 @@ public class Camera
 		}
 	}
 
-	/*// Custom implementation of the LookAt function
+	// Custom implementation of the LookAt function
 	public Matrix4f calculate_lookAt_matrix(Vector3f position, Vector3f target)
 	{
 		Vector3f zaxis = new Vector3f();
@@ -161,30 +162,35 @@ public class Camera
 		yaxis = Utility.Cross(xaxis, zaxis);
 		//zaxis.cross(xaxis, yaxis);
 
+
 		// Create translation and rotation matrix
 		// In glm it is column-major layout
 		Matrix4f translation = new Matrix4f(); // Identity matrix by default
-		translation.m00(-position.x);
-		translation.m30(-position.x); // Third column, first row
-		translation.m31(-position.y);
-		translation.m32(-position.z);
+		translation.setColumn(3, new Vector4f(position.negate(), 1));
+		//translation.m00(-position.x);
+		//translation.m30(-position.x); // Third column, first row
+		//translation.m31(-position.y);
+		//translation.m32(-position.z);
+
 		Matrix4f rotation = new Matrix4f();
-		//rotation.setColumn(xaxis);
-		rotation.m00(xaxis.x); // First column, first row
-		rotation.m10(xaxis.y);
-		rotation.m20(xaxis.z);
-		rotation.m01(yaxis.x); // First column, second row
-		rotation.m11(yaxis.y);
-		rotation.m21(yaxis.z);
-		rotation.m02(zaxis.x); // First column, third row
-		rotation.m12(zaxis.y);
-		rotation.m22(zaxis.z);
+		rotation.setRow(0, new Vector4f(xaxis, 0));
+		//rotation.m00(xaxis.x); // First column, first row
+		//rotation.m10(xaxis.y);
+		//rotation.m20(xaxis.z);
+		rotation.setRow(1, new Vector4f(yaxis, 0));
+		//rotation.m01(yaxis.x); // First column, second row
+		//rotation.m11(yaxis.y);
+		//rotation.m21(yaxis.z);
+		rotation.setRow(0, new Vector4f(zaxis, 0));
+		//rotation.m02(zaxis.x); // First column, third row
+		//rotation.m12(zaxis.y);
+		//rotation.m22(zaxis.z);
 	
 		// Return lookAt matrix as combination of translation and rotation matrix
 		Matrix4f result = new Matrix4f();
 		//return rotation * translation;
-		rotation.mul(translation, result); // Remember to read from right to left (first translation then rotation)
+		translation.mul(rotation, result); // Remember to read from right to left (first translation then rotation)
 	
 		return result;
-	}*/
+	}
 }

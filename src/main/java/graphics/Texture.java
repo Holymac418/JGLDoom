@@ -1,7 +1,8 @@
-package Graphics;
+package graphics;
 
 import program.JGLDoom;
 import org.lwjgl.BufferUtils;
+import program.Utility;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -11,7 +12,7 @@ import static org.lwjgl.stb.STBImage.*;
 
 public class Texture
 {
-	public static String FulltextureDirectory = JGLDoom.WkDir + "\\src\\main\\resources\\Textures\\";
+	public static String FulltextureDirectory = Utility.WkDir + "\\src\\main\\resources\\Textures\\";
 
 	public int diffuseMap;
 	public int specularMap;
@@ -52,7 +53,7 @@ public class Texture
 		Width = w.get(0);
 		Height = h.get(0);
 		NumChannels = c.get(0);
-		System.out.println(NumChannels);
+		//System.out.println(NumChannels);
 		if (data != null && data.remaining() > 0)
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, ColourType, GL_UNSIGNED_BYTE, data);

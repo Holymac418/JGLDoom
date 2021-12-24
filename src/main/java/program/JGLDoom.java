@@ -1,6 +1,6 @@
 package program;
 
-import Graphics.*;
+import graphics.*;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -11,6 +11,8 @@ import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
+import wadstuff.WadReader;
+
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -19,8 +21,8 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class JGLDoom
 {
-	public static String WkDir = System.getProperty("user.dir");
-	
+	public WadReader wadReader = new WadReader();
+
 	// The window handle
 	private long window;
 	short WindowWidth = 800;
@@ -28,8 +30,11 @@ public class JGLDoom
 	float WindowAspectRatio = ((float) WindowWidth) / ((float) WindowHeight);
 	boolean firstMouse = true;
 	double lastX, lastY;
+
 	int VAO, VBO, lightCubeVAO;
 	int sizeofFloat = 4;
+
+	float rot = 0.0f;
 
 	float[] CubeVertices =
 	{
@@ -113,7 +118,9 @@ public class JGLDoom
 	{
 		System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 		//print(System.getProperty("user.dir"));
+		System.out.println(Utility.GetIntLittleEndian(new byte[]{73, 87, 65, 68}, 0, 4));
 		init();
+		wadReader.ReadWad("DOOM.wad");
 		loop();
 		// Free the window callbacks and destroy the window
 		glfwFreeCallbacks(window);
@@ -289,6 +296,7 @@ public class JGLDoom
 	public void Update(float DeltaTime)
 	{
 		cam.CameraControl(window, DeltaTime);
+		rot += DeltaTime * 0.1f;
 	}
 
 	public void RenderFrame()
@@ -394,8 +402,8 @@ public class JGLDoom
 		{
 			model = new Matrix4f();
 			model.translate(CubePositions[i]);
-			float angle = 20.0f * i;
-			model = model.rotate((float) Math.toRadians(angle), new Vector3f(1.0f, 0.3f, 0.5f));
+			//float angle = rot + (20.0f * i);
+			//model = model.rotate((float) Math.toRadians(angle), new Vector3f(1.0f, 0.3f, 0.5f));
 			DefaultShader.setmat4("model", model);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);

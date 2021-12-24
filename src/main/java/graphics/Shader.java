@@ -1,6 +1,7 @@
-package Graphics;
+package graphics;
 
-import program.JGLDoom;
+import program.Utility;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -20,7 +21,7 @@ enum ShaderType
 
 public class Shader
 {
-	public static String FullShaderDirectory = JGLDoom.WkDir + "\\src\\main\\resources\\Shaders\\";
+	public static String FullShaderDirectory = Utility.WkDir + "\\src\\main\\resources\\Shaders\\";
 
 	public int ID;
 	String VertexShaderCode;

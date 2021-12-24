@@ -1,4 +1,4 @@
-package Graphics.Models;
+package graphics.models;
 
 public class Model
 {

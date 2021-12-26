@@ -1,18 +1,37 @@
+wadstuff/PNAMES.java
+ wadstuff.PNAMES
+graphics/Colour.java
+ graphics.Colour
+wadstuff/COLORMAP.java
+ wadstuff.COLORMAP
+wadstuff/WadData.java
+ wadstuff.WadData
 graphics/models/Model.java
  graphics.models.Model
-program/Utility.java
- program.Utility
+wadstuff/LumpInfo.java
+ wadstuff.LumpInfo
+wadstuff/PLAYPAL.java
+ wadstuff.PLAYPAL
+wadstuff/WadReader.java
+ wadstuff.WadReader
+wadstuff/CurrentlyScanning.java
+ wadstuff.CurrentlyScanning
 program/Camera.java
  program.Camera
+program/UnsignedByte.java
+ program.UnsignedByte
+wadstuff/WadType.java
+ wadstuff.WadType
+program/Utility.java
+ program.Utility
 graphics/Texture.java
  graphics.Texture
 graphics/Shader.java
  graphics.Shader
  graphics.ShaderType
-wadstuff/WadReader.java
- wadstuff.WadReader
- wadstuff.WadType
 program/JGLDoom.java
  program.JGLDoom
  program.JGLDoom$1
  program.JGLDoom$2
+wadstuff/GraphicsLump.java
+ wadstuff.GraphicsLump

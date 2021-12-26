@@ -5,7 +5,7 @@ It is Intended to be a learning experience, and not really anything mainstream-u
 
 ## Features so far:
 - Basic Fly-cam
-- Reads IWAD's (or PWAD's) header and directory, printing the wad type, lump names and other misc stuff to the console.
+- Reads IWAD's (or PWAD's) header and directory, sorts lumps and reads the PLAYPAL.
 
 ## Most Recent Release:
 - No releases yet.

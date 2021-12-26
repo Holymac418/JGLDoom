@@ -11,6 +11,7 @@ import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
+import wadstuff.WadData;
 import wadstuff.WadReader;
 
 import static org.lwjgl.glfw.Callbacks.*;
@@ -21,6 +22,7 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class JGLDoom
 {
+	WadData wadData;
 	public WadReader wadReader = new WadReader();
 
 	// The window handle
@@ -31,7 +33,7 @@ public class JGLDoom
 	boolean firstMouse = true;
 	double lastX, lastY;
 
-	int VAO, VBO, lightCubeVAO;
+	int VAO, VBO, EBO, lightCubeVAO;
 	int sizeofFloat = 4;
 
 	float rot = 0.0f;
@@ -118,9 +120,7 @@ public class JGLDoom
 	{
 		System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 		//print(System.getProperty("user.dir"));
-		System.out.println(Utility.GetIntLittleEndian(new byte[]{73, 87, 65, 68}, 0, 4));
 		init();
-		wadReader.ReadWad("DOOM.wad");
 		loop();
 		// Free the window callbacks and destroy the window
 		glfwFreeCallbacks(window);
@@ -133,12 +133,22 @@ public class JGLDoom
 
 	private void init()
 	{
+		initWindow();
+		initMesh();
+		initShaders();
+		wadData = new WadData("DOOM.wad");
+		wadReader.ReadWad(wadData);
+		initTextures();
+	}
+
+	private void initWindow()
+	{
 		// Setup an error callback. The default implementation
 		// will print the error message in System.err.
 		GLFWErrorCallback.createPrint(System.err).set();
 
 		// Initialize GLFW. Most GLFW functions will not work before doing this.
-		if(!glfwInit())
+		if (!glfwInit())
 		{
 			throw new IllegalStateException("Unable to initialize GLFW");
 		}
@@ -154,7 +164,7 @@ public class JGLDoom
 
 		// Create the window
 		window = glfwCreateWindow(WindowWidth, WindowHeight, "Slingnut Game Java", NULL, NULL);
-		if(window == NULL)
+		if (window == NULL)
 		{
 			throw new RuntimeException("Failed to create the GLFW window");
 		}
@@ -163,7 +173,7 @@ public class JGLDoom
 		// Setup a key callback. It will be called every time a key is pressed, repeated or released.
 		glfwSetKeyCallback(window, (window, key, scancode, action, mods) ->
 		{
-			if(key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+			if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
 			{
 				glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
 			}
@@ -172,7 +182,7 @@ public class JGLDoom
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		// Get the thread stack and push a new frame
-		try(MemoryStack stack = stackPush())
+		try (MemoryStack stack = stackPush())
 		{
 			IntBuffer pWidth = stack.mallocInt(1); // int*
 			IntBuffer pHeight = stack.mallocInt(1); // int*
@@ -184,12 +194,8 @@ public class JGLDoom
 			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
 			// Center the window
-			glfwSetWindowPos
-			(
-				window,
-				(vidmode.width() - pWidth.get(0)) / 2,
-				(vidmode.height() - pHeight.get(0)) / 2
-			);
+			glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2,
+				(vidmode.height() - pHeight.get(0)) / 2);
 		} // the stack frame is popped automatically
 
 		// Make the OpenGL context current
@@ -205,35 +211,45 @@ public class JGLDoom
 
 		// configure global opengl state
 		glEnable(GL_DEPTH_TEST);
+	}
 
+	private void initShaders()
+	{
 		// SHADERS
 		// -------
 		DefaultShader = new Shader("3.3.shader"); //"6.3.coordinate_systems"
 		//DefaultShader.use();
 		LightingShader = new Shader("3.3.lightshader");
 		//LightingShader.use();
+	}
 
+	private void initMesh()
+	{
 		// VERTEX BUFFER ARRAYS AND VERTEX BUFFER OBJECTS
 		// ----------------------------------------------
 		VAO = glGenVertexArrays();
 		VBO = glGenBuffers();
+		//EBO = glGenBuffers();
 
 		glBindVertexArray(VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, CubeVertices, GL_STATIC_DRAW);
 
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, CubeVertices, GL_STATIC_DRAW);
+
 		// position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeofFloat, 0);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeofFloat, 0);
 
 		// normal attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeofFloat, 3 * sizeofFloat);
 		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeofFloat, 3 * sizeofFloat);
 
 		// texture coord attribute
-		glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeofFloat, 6 * sizeofFloat);
 		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeofFloat, 6 * sizeofFloat);
 
 		// second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
 		lightCubeVAO = glGenVertexArrays();
@@ -243,10 +259,14 @@ public class JGLDoom
 		// note that we update the lamp's position attribute's stride to reflect the updated buffer data
 		glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeofFloat, 0);
 		glEnableVertexAttribArray(0);
+	}
 
+	private void initTextures()
+	{
 		// TEXTURES
 		// --------
-		Tex = new Texture(DefaultShader, "resources/textures", "container2" , ".png", GL_REPEAT, true, GL_RGBA);
+		//Tex = new Texture(DefaultShader, "resources/textures", "PLAYPAL0" , ".png", GL_REPEAT, true, GL_RGBA);
+		Tex = wadData.Graphics.get(24).texture;
 		//DefaultShader.use();
 		DefaultShader.setTexture(Tex);
 		//Texture2 = new Texture(DefaultShader,"resources/textures", "awesomeface", ".png", GL_REPEAT, true, GL_RGBA);
@@ -393,11 +413,11 @@ public class JGLDoom
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, Tex.diffuseMap);
 		// bind specular map
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, Tex.specularMap);
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindTexture(GL_TEXTURE_2D, Tex.specularMap);
 
 		// render containers
-		glBindVertexArray(VAO);
+
 		for(int i = 0; i < 10; i++)
 		{
 			model = new Matrix4f();
@@ -405,11 +425,13 @@ public class JGLDoom
 			//float angle = rot + (20.0f * i);
 			//model = model.rotate((float) Math.toRadians(angle), new Vector3f(1.0f, 0.3f, 0.5f));
 			DefaultShader.setmat4("model", model);
-
+			glBindVertexArray(VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
 		}
 
-		// also draw the lamp object(s)
+
+		/*// also draw the lamp object(s)
 		LightingShader.use();
 		LightingShader.setmat4("projection", projection);
 		LightingShader.setmat4("view", view);
@@ -423,7 +445,7 @@ public class JGLDoom
 			model.scale(new Vector3f(0.2f)); // Make it a smaller cube
 			LightingShader.setmat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		}*/
 
 		glfwSwapBuffers(window); // swap the color buffers
 	}
@@ -495,10 +517,4 @@ public class JGLDoom
 	{
 		new JGLDoom().run();
 	}
-
-	public void print(String s)
-	{
-		System.out.println(s);
-	}
-
 }
